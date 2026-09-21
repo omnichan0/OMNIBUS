@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Sequence
+from pathlib import Path
+from typing import Sequence
 
 from .execution import CommandExecutor, ExecutionProfile, ExecutionResult
 from .policy import ApprovalDecision, ApprovalPolicy, ExecutionRequest, RiskLevel
-from .registry import CapabilityRegistry, default_capability_registry
+from .registry import CapabilityRegistry, load_registry
 
 
 @dataclass(frozen=True, slots=True)
@@ -17,15 +18,16 @@ class Plan:
 
 
 class Orchestrator:
-    """Connect capability selection, policy, and real execution.
-
-    The orchestrator does not grant permissions. It evaluates a request and
-    requires an explicit approval decision before executing a high-risk plan.
-    """
+    """Connect capability selection, policy, and real execution."""
 
     def __init__(self, registry: CapabilityRegistry | None = None, policy: ApprovalPolicy | None = None) -> None:
-        self.registry = registry or default_capability_registry()
+        self.registry = registry or self._load_default_registry()
         self.policy = policy or ApprovalPolicy()
+
+    @staticmethod
+    def _load_default_registry() -> CapabilityRegistry:
+        path = Path(__file__).resolve().parents[2] / "config" / "capabilities.yaml"
+        return load_registry(path)
 
     def plan(
         self,
@@ -45,6 +47,8 @@ class Orchestrator:
         return Plan(request, decision, selected.backend.value, tuple(map(str, command)))
 
     def execute(self, plan: Plan, *, profile: ExecutionProfile | None = None, timeout: float | None = None) -> ExecutionResult:
+        if plan.approval.state is RiskLevel:  # pragma: no cover - defensive type guard
+            raise RuntimeError("Invalid approval state")
         if plan.approval.state.value == "pending":
             raise PermissionError(f"Approval required for request {plan.request.request_id}")
         selected = profile or ExecutionProfile(name=f"{plan.request.capability}-direct")
