@@ -1,0 +1,35 @@
+# Capability registry: describe WHAT the factory needs, not a fixed provider.
+# Implementations can be discovered dynamically through MCP, adapters,
+# local services, Hugging Face, or external APIs.
+capabilities:
+  - id: reasoning
+    category: model
+    discovery: [local_model, huggingface, openai_compatible]
+  - id: coding
+    category: model
+    discovery: [local_model, huggingface, openai_compatible]
+  - id: web_research
+    category: research
+    discovery: [mcp, adapter, search_api]
+  - id: browser
+    category: computer_use
+    discovery: [mcp, local_service]
+  - id: video_generation
+    category: media
+    discovery: [huggingface_space, mcp, external_api]
+  - id: image_generation
+    category: media
+    discovery: [huggingface_space, mcp, external_api]
+  - id: globe
+    category: geospatial
+    discovery: [mcp, adapter, local_service]
+  - id: public_cctv
+    category: geospatial
+    discovery: [adapter, mcp]
+    authorization: public_or_authorized_only
+  - id: satellite
+    category: geospatial
+    discovery: [adapter, mcp, public_api]
+  - id: document_rag
+    category: knowledge
+    discovery: [local_service, mcp]

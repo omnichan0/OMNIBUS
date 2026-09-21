@@ -1,0 +1,14 @@
+# Models are examples only. Do not hard-code a single provider into code.
+models:
+  reasoning:
+    preferred: []
+    fallbacks: []
+  coding:
+    preferred: []
+    fallbacks: []
+  vision:
+    preferred: []
+    fallbacks: []
+  video:
+    preferred: []
+    fallbacks: []

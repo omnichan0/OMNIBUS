@@ -1,0 +1,1 @@
+Choose a repository license before publishing. The upstream licenses of incorporated projects remain applicable.
