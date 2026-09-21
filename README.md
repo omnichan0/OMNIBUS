@@ -1,5 +1,9 @@
 # OMNIBUS
 
+<p align="center">
+  <img src="assets/omnibus-banner.svg" alt="OMNIBUS — Advanced AI-Assisted Repository powered by GitHub Copilot" width="100%" />
+</p>
+
 [![Quality checks](https://github.com/omnichan0/OMNIBUS/actions/workflows/sanity.yml/badge.svg?branch=main)](https://github.com/omnichan0/OMNIBUS/actions/workflows/sanity.yml)
 
 OMNIBUS is an extensible AI-agent platform foundation. Its primary implementation, **Sovereign AI Factory**, provides a portable runtime for capability discovery, provider adapters, policy-controlled execution, local models, and Open WebUI integration.
@@ -17,18 +21,38 @@ OMNIBUS is an extensible AI-agent platform foundation. Its primary implementatio
 
 ## Repository layout
 
+The repository is intentionally organized as a complete project tree rather than a single documentation folder:
+
 ```text
 OMNIBUS/
 ├── README.md
+├── assets/
+│   └── omnibus-banner.svg
 └── sovereign-ai-factory/
     ├── README.md
     ├── pyproject.toml
     ├── config/
+    │   └── capabilities.yaml
     ├── src/sovereign/
+    │   ├── __init__.py
+    │   ├── agent.py
+    │   ├── cli.py
+    │   ├── config.py
+    │   ├── discovery.py
+    │   ├── execution.py
+    │   ├── orchestrator.py
+    │   ├── persistence.py
+    │   ├── policy.py
+    │   └── registry.py
     ├── tests/
     ├── core/
     ├── bootstrap/
+    ├── adapters/
+    ├── scripts/
+    ├── install.sh
+    ├── install.ps1
     └── .github/workflows/
+        └── sanity.yml
 ```
 
 ## Quick start
@@ -43,8 +67,6 @@ chmod +x install.sh
 ```
 
 ### Google Colab
-
-Clone the repository, install the package, and run the validation commands from a Colab shell cell:
 
 ```bash
 !git clone https://github.com/omnichan0/OMNIBUS.git /content/OMNIBUS

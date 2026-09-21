@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1365 768" role="img" aria-labelledby="title desc">
+  <title id="title">OMNIBUS — Advanced AI-Assisted Repository</title>
+  <desc id="desc">A neon cyan and violet geometric cube over a connected technology network.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#02030d"/>
+      <stop offset="0.55" stop-color="#07051b"/>
+      <stop offset="1" stop-color="#02030c"/>
+    </linearGradient>
+    <linearGradient id="neon" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#35f5ff"/>
+      <stop offset="0.55" stop-color="#6bfaff"/>
+      <stop offset="1" stop-color="#ba6cff"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="28"/></filter>
+  </defs>
+  <rect width="1365" height="768" rx="32" fill="url(#bg)"/>
+  <ellipse cx="680" cy="330" rx="340" ry="230" fill="#142c71" opacity=".18" filter="url(#soft)"/>
+  <g stroke="#245578" stroke-width="2" opacity=".55" fill="none">
+    <path d="M80 390 L205 260 L355 330 L510 205 L680 280"/><path d="M1285 390 L1160 260 L1010 330 L855 205 L680 280"/>
+    <path d="M110 500 L270 450 L405 540 L520 400 L680 470"/><path d="M1255 500 L1095 450 L960 540 L845 400 L680 470"/>
+  </g>
+  <g fill="#1b4f78" stroke="#39eaff" stroke-width="2" opacity=".85">
+    <circle cx="205" cy="260" r="8"/><circle cx="355" cy="330" r="11"/><circle cx="510" cy="205" r="7"/><circle cx="1160" cy="260" r="8"/><circle cx="1010" cy="330" r="11"/><circle cx="855" cy="205" r="7"/><circle cx="270" cy="450" r="8"/><circle cx="405" cy="540" r="10"/><circle cx="1095" cy="450" r="8"/><circle cx="960" cy="540" r="10"/>
+  </g>
+  <g transform="translate(682 255)" fill="none" stroke="url(#neon)" stroke-width="8" stroke-linejoin="round" filter="url(#glow)">
+    <path d="M0 -120 L112 -55 L112 75 L0 140 L-112 75 L-112 -55 Z"/>
+    <path d="M0 -120 L0 10 L112 75 M0 10 L-112 75"/>
+    <path d="M-112 -55 L0 10 L112 -55"/>
+    <path d="M-62 -86 L0 -50 L62 -86 M-62 -86 L-62 35 L0 70 L62 35 L62 -86" opacity=".9"/>
+  </g>
+  <text x="682" y="535" text-anchor="middle" fill="#59f3ff" font-family="Arial,Helvetica,sans-serif" font-size="72" letter-spacing="13">OMNIBUS</text>
+  <text x="682" y="598" text-anchor="middle" fill="#9d86ec" font-family="Arial,Helvetica,sans-serif" font-size="27" letter-spacing="1">Advanced AI-Assisted Repository</text>
+  <text x="682" y="635" text-anchor="middle" fill="#c3b9f4" font-family="Arial,Helvetica,sans-serif" font-size="27">Powered by GitHub Copilot</text>
+  <text x="682" y="704" text-anchor="middle" fill="#55d8e8" font-family="Arial,Helvetica,sans-serif" font-size="22">github.com/omnichan0/OMNIBUS</text>
+</svg>
