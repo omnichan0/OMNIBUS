@@ -28,7 +28,7 @@ OMNIBUS/
 ├── README.md
 ├── assets/
 │   └── omnibus-banner.svg
-└── sovereign-ai-factory/
+└── 
     ├── README.md
     ├── pyproject.toml
     ├── config/
@@ -61,7 +61,7 @@ OMNIBUS/
 
 ```bash
 git clone https://github.com/omnichan0/OMNIBUS.git
-cd OMNIBUS/sovereign-ai-factory
+cd OMNIBUS
 chmod +x install.sh
 ./install.sh
 ```
@@ -80,7 +80,7 @@ For the full Colab runtime, configure `HF_TOKEN` and, when a public URL is requi
 
 ### Windows
 
-The supported Windows path uses WSL2 so the same Linux runtime can be used. See `sovereign-ai-factory/README.md` and `install.ps1` for the Windows setup path.
+The supported Windows path uses WSL2 so the same Linux runtime can be used. See `README.md` and `install.ps1` for the Windows setup path.
 
 ## Validation status
 
@@ -121,4 +121,4 @@ Useful labels include `testing`, `bug`, `production-readiness`, and `security`.
 
 ## Main project
 
-The implementation and detailed runtime documentation are in [`sovereign-ai-factory/`](sovereign-ai-factory/).
+The implementation and detailed runtime documentation are in [``]().
