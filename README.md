@@ -1,124 +1,145 @@
-# OMNIBUS
+# Aladejana Loveth Ayomide
+## omnichan0 | journeyman | Amaterasu Warlord | Encyclopedia
 
-<p align="center">
-  <img src="assets/omnibus-banner.svg" alt="OMNIBUS — Advanced AI-Assisted Repository powered by GitHub Copilot" width="100%" />
-</p>
+> Creator • Technologist • Storyteller • Educator • Cultural Strategist • AI Builder
 
-[![Quality checks](https://github.com/omnichan0/OMNIBUS/actions/workflows/sanity.yml/badge.svg?branch=main)](https://github.com/omnichan0/OMNIBUS/actions/workflows/sanity.yml)
+Twitter / Telegram: @journeyman189
 
-OMNIBUS is an extensible AI-agent platform foundation. Its primary implementation, **Sovereign AI Factory**, provides a portable runtime for capability discovery, provider adapters, policy-controlled execution, local models, and Open WebUI integration.
+---
 
-## Highlights
+## About Me
 
-- **Registry-driven capabilities** configured through YAML
-- **Runtime provider discovery** through manifests and entry points
-- **Risk-based approval gates** for high-risk providers and actions
-- **Policy-aware execution** with direct and optional Docker backends
-- **Persistent provider state** and approval records outside Git
-- **Colab-friendly deployment** with optional Google Drive persistence
-- **Open WebUI as the primary user interface**
-- **Security-oriented defaults** for secrets, public tunnels, and authorized data sources
+I am Aladejana Loveth Ayomide — a multidisciplinary creative, developer, educator, and systems thinker whose life and work live at the intersection of culture, technology, myth, and service.
 
-## Repository layout
+I carry a strong ancestral identity rooted in Owo, with paternal lineage linked to High Chief Alamuoye of Agbado-Ekiti in the Isarun Quarters. My work draws continuously from Yoruba philosophy, mythology, oral tradition, and the sacred symbolism of Oríkì, Ofọ̀, Àyájọ́, and the spiritual world of the Orisha.
 
-The repository is intentionally organized as a complete project tree rather than a single documentation folder:
+I am deeply committed to building intelligent systems that are not only powerful, but also meaningful, intentional, and culturally grounded.
 
-```text
-OMNIBUS/
-├── README.md
-├── assets/
-│   └── omnibus-banner.svg
-└── 
-    ├── README.md
-    ├── pyproject.toml
-    ├── config/
-    │   └── capabilities.yaml
-    ├── src/sovereign/
-    │   ├── __init__.py
-    │   ├── agent.py
-    │   ├── cli.py
-    │   ├── config.py
-    │   ├── discovery.py
-    │   ├── execution.py
-    │   ├── orchestrator.py
-    │   ├── persistence.py
-    │   ├── policy.py
-    │   └── registry.py
-    ├── tests/
-    ├── core/
-    ├── bootstrap/
-    ├── adapters/
-    ├── scripts/
-    ├── install.sh
-    ├── install.ps1
-    └── .github/workflows/
-        └── sanity.yml
-```
+---
 
-## Quick start
+## Creative Work & Writing
 
-### Linux
+I am a published author with works including:
 
-```bash
-git clone https://github.com/omnichan0/OMNIBUS.git
-cd OMNIBUS
-chmod +x install.sh
-./install.sh
-```
+- OUR SHIP
+- SCARE WITHIN
+- JOHN WICK 1&2
+- KARMA ON A WINTER HOLIDAY
 
-### Google Colab
+I am also a published poet featured on PoemHunter, and I write speculative fiction rooted in myth, symbolism, and human struggle.
 
-```bash
-!git clone https://github.com/omnichan0/OMNIBUS.git /content/OMNIBUS
-%cd /content/OMNIBUS/sovereign-ai-factory
-!python -m pip install -e ".[dev]"
-!python -m compileall -q src core bootstrap
-!pytest -q
-```
+### Speculative fiction & mythology
+I developed the dark fantasy manuscript:
 
-For the full Colab runtime, configure `HF_TOKEN` and, when a public URL is required, `NGROK_TOKEN` through Colab Secrets. Never commit credentials.
+- THE MOUNTAIN GOD MANUSCRIPT
 
-### Windows
+This work blends:
 
-The supported Windows path uses WSL2 so the same Linux runtime can be used. See `README.md` and `install.ps1` for the Windows setup path.
+- Yoruba mythology
+- Orisha mythos
+- hidden ancestral intelligence
+- spiritual warfare and destiny
+- Xianxia-inspired cultivation concepts
+- heroic transformation and ceremonial power
 
-## Validation status
+I also developed the concept of:
 
-The production foundation has been merged into `main` and has passed the following checks in Google Colab/direct-execution mode:
+- JOURNEYMAN
 
-- Python compilation and automated tests
-- Package import and capability-registry checks
-- CLI diagnostics and capability listing
-- Platform and GPU detection
-- Invalid provider-manifest rejection
-- High-risk provider approval gating
-- Direct-execution safety checks
-- Orchestrator smoke execution
+a story-world and philosophical framework that fuses mythic realism, spiritual identity, and layered worldbuilding.
 
-Docker execution and full model/Open WebUI bootstrap are environment-specific follow-up tests and are not represented by the direct-execution validation badge.
+### Game design & tactical concepts
+I have also designed conceptual frameworks for multi-dimensional tactical simulation games focused on:
 
-## Tester feedback
+- spatial mechanics
+- adaptive AI behaviors
+- layered strategy and decision systems
+- supernatural and mythic environments
 
-If you test OMNIBUS, please open a GitHub Issue or comment on the relevant pull request with:
+---
 
-- operating system and Python version
-- commit or branch tested
-- command or workflow used
-- expected behavior
-- actual behavior
-- logs or traceback
-- suggested improvement
+## Technology & AI
 
-Useful labels include `testing`, `bug`, `production-readiness`, and `security`.
+I build systems that combine local intelligence, runtime orchestration, automation, and developer tooling.
 
-## Security and responsible use
+### Core areas
+- Sovereign AI and local model deployment
+- GGUF-based local inference
+- AI-assisted workflows and orchestration
+- Open-source tooling and experimentation
+- Cybersecurity, OSINT, and systems analysis
+- Web application development
+- Automation pipelines and AI interfaces
 
-- Keep `HF_TOKEN`, `NGROK_TOKEN`, API keys, and other secrets outside Git.
-- Expose only Open WebUI through a public tunnel unless additional endpoints are explicitly protected.
-- Keep administrative, shell, computer-use, MCP, and backend endpoints local or authenticated.
-- Use only public or authorized data sources.
-- Review third-party licenses and provider terms before enabling integrations.
+### Stack
+- Languages: Python, JavaScript, HTML, CSS, Node.js
+- Frameworks: Express, Flask, Tailwind CSS
+- Platforms: Replit, Firebase, GitHub, Render, Vercel, Google Cloud Shell
+- AI tooling: Cline, Continue, Llama, Dolphin, Qwen, OpenRouter
+- Local models: DeepSeek-R1, WhiteRabbitNeo, Qwen, and GGUF-based model ecosystems
 
-## Main project
+### Projects
+- OMNIBUS — sovereign AI platform foundation
+- AJIKE — personal AI interface experimentation
+- CBT platforms for secondary schools
+- Automated workflow systems using n8n
+- Decentralized experiments such as AJIKE Coin on the TON testnet
+- Security and OSINT-focused exploration
 
-The implementation and detailed runtime documentation are in [``]().
+---
+
+## Education & Professional Experience
+
+### Education
+- Tourism and Hospitality Management graduate from Ekiti State University
+- Secondary education:
+  - Ado Community High School
+  - Ibadan Community High School
+- Primary education:
+  - Emmanuel Nursery/Primary
+  - Christ Reigneth Nursery/Primary
+
+### Teaching & Curriculum Design
+I currently serve as a secondary school teacher at Ekiti Anglican Diocesan High School, where I teach Government and History.
+
+I create:
+
+- NERDC-aligned curriculum structures
+- WAEC-standard examination materials
+- lesson plans and academic content
+- Cultural & Creative Arts instructional resources
+- digital training in programming, cybersecurity, and ethical hacking
+
+### Leadership & Advocacy
+I serve as Senior Special Assistant on External Matters at the Youth Confederation of Nigeria, where I contribute to:
+
+- youth advocacy
+- external engagement
+- public-facing strategy
+- representation and mobilization
+
+---
+
+## Philosophy
+
+I believe in:
+
+- building with purpose
+- preserving cultural memory
+- combining creativity with systems thinking
+- using technology to solve real human problems
+- honoring ancestry while shaping the future
+- turning knowledge into tools, stories, and impact
+
+---
+
+## Contact
+
+- Twitter / Telegram: @journeyman189
+- GitHub: omnichan0
+
+---
+
+## Signature
+
+I work at the intersection of myth, code, leadership, and future-building — turning stories, systems, and knowledge into instruments of growth, vision, and transformation.
