@@ -20,17 +20,17 @@ class CapabilitySpec:
         name = str(value.get("id", "")).strip()
         if not name:
             raise ValueError("Capability entries require a non-empty id")
-        discovery = value.get("discovery", ())
-        if isinstance(discovery, str):
-            discovery = (discovery,)
-        if not isinstance(discovery, (list, tuple)):
+        raw_discovery = value.get("discovery", ())
+        if isinstance(raw_discovery, str):
+            raw_discovery = (raw_discovery,)
+        if not isinstance(raw_discovery, (list, tuple)):
             raise ValueError(f"Capability '{name}' discovery must be a list")
         known = {"id", "category", "discovery", "authorization"}
         metadata = {key: item for key, item in value.items() if key not in known}
         return cls(
             name=name,
             category=str(value.get("category", "general")),
-            discovery=tuple(str(item) for item in discovery),
+            discovery=tuple(str(item) for item in raw_discovery),
             authorization=value.get("authorization"),
             metadata=metadata,
         )
@@ -71,7 +71,6 @@ class CapabilityRegistry:
         self._adapters.setdefault(spec.name, [])
 
     def register_discovered_capability(self, spec: CapabilitySpec) -> None:
-        """Register a capability discovered by an adapter/repository inspector."""
         self.register_capability(spec, replace=True)
 
     def register_adapter(self, adapter: AdapterSpec) -> None:
@@ -98,10 +97,12 @@ class CapabilityRegistry:
         return sorted(self._capabilities)
 
     def resolve(self, capability_name: str) -> list[AdapterSpec]:
-        adapters = self.adapters_for(capability_name)
-        return sorted(adapters, key=lambda adapter: (len(adapter.required_permissions), adapter.name))
+        return sorted(
+            self.adapters_for(capability_name),
+            key=lambda adapter: (len(adapter.required_permissions), adapter.name),
+        )
 
 
 def load_registry(path: str | Path) -> CapabilityRegistry:
-    """Load the complete capability registry from the operator's YAML file."""
+    """Load capabilities from the operator-controlled YAML configuration."""
     return CapabilityRegistry.from_yaml(path)
