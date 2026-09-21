@@ -3,9 +3,10 @@ from __future__ import annotations
 import json
 from dataclasses import asdict
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from .discovery import DiscoveryResult, ProviderManifest
+if TYPE_CHECKING:
+    from .discovery import DiscoveryResult, ProviderManifest
 
 
 class ProviderStateStore:

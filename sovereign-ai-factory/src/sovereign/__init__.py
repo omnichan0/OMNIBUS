@@ -6,6 +6,7 @@ from .config import CapabilityConfig, load_capability_registry
 from .discovery import DiscoveryResult, ProviderDiscovery, ProviderManifest
 from .execution import CommandExecutor, ExecutionBackend, ExecutionProfile, ExecutionResult
 from .orchestrator import Orchestrator, Plan
+from .persistence import ProviderStateStore
 from .policy import ApprovalDecision, ApprovalPolicy, ApprovalState, ExecutionRequest, RiskLevel
 from .registry import AdapterSpec, CapabilityRegistry, CapabilitySpec, load_registry
 
@@ -14,6 +15,6 @@ __all__ = [
     "ApprovalState", "CapabilityConfig", "CapabilityRegistry", "CapabilitySpec",
     "CommandExecutor", "DiscoveryResult", "ExecutionBackend", "ExecutionProfile",
     "ExecutionRequest", "ExecutionResult", "Orchestrator", "Plan", "ProviderDiscovery",
-    "ProviderManifest", "RiskLevel", "create_default_runtime", "doctor",
+    "ProviderManifest", "ProviderStateStore", "RiskLevel", "create_default_runtime", "doctor",
     "load_capability_registry", "load_registry",
 ]

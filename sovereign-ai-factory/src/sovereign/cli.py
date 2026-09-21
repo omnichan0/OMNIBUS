@@ -61,12 +61,27 @@ def configure_credentials(*, interactive: bool = True) -> dict[str, bool]:
 
 
 def doctor() -> dict[str, object]:
-    return {"platform": platform.platform(), "python": platform.python_version(), "backends": sorted(str(item) for item in available_backends()), "git": shutil.which("git") is not None, "docker": shutil.which("docker") is not None, "hf_token_configured": bool(os.environ.get("HF_TOKEN")), "ngrok_token_configured": bool(os.environ.get("NGROK_TOKEN") or os.environ.get("NGROK_AUTHTOKEN")), "capabilities": _registry().registered_capabilities()}
+    return {
+        "platform": platform.platform(),
+        "python": platform.python_version(),
+        "backends": sorted(str(item) for item in available_backends()),
+        "git": shutil.which("git") is not None,
+        "docker": shutil.which("docker") is not None,
+        "hf_token_configured": bool(os.environ.get("HF_TOKEN")),
+        "ngrok_token_configured": bool(os.environ.get("NGROK_TOKEN") or os.environ.get("NGROK_AUTHTOKEN")),
+        "capabilities": _registry().registered_capabilities(),
+    }
 
 
 def discover(manifest_directory: str | None, approve: bool) -> int:
-    results = ProviderDiscovery(_registry(), store=_state_store()).discover(manifest_directory=manifest_directory, approved=approve)
-    print(json.dumps([{"name": item.manifest.name, "capability": item.manifest.capability, "state": item.state, "reason": item.reason} for item in results], indent=2))
+    results = ProviderDiscovery(_registry(), store=_state_store()).discover(
+        manifest_directory=manifest_directory, approved=approve
+    )
+    print(json.dumps([
+        {"name": item.manifest.name, "capability": item.manifest.capability,
+         "state": item.state, "reason": item.reason}
+        for item in results
+    ], indent=2))
     return 0
 
 
@@ -87,7 +102,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("capabilities", help="list configured capability contracts")
     found = sub.add_parser("discover", help="discover provider manifests")
     found.add_argument("--manifest-dir")
-    found.add_argument("--approve", action="store_true", help="approve discovered providers allowed by this invocation")
+    found.add_argument("--approve", action="store_true")
     install = sub.add_parser("install", help="configure providers and launch the runtime")
     install.add_argument("--non-interactive", action="store_true")
     install.add_argument("--no-tunnel", action="store_true")
@@ -97,9 +112,11 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.command == "doctor":
-        print(json.dumps(doctor(), indent=2)); return 0
+        print(json.dumps(doctor(), indent=2))
+        return 0
     if args.command == "capabilities":
-        print("\n".join(_registry().registered_capabilities())); return 0
+        print("\n".join(_registry().registered_capabilities()))
+        return 0
     if args.command == "discover":
         return discover(args.manifest_dir, args.approve)
     if args.command == "install":
@@ -108,7 +125,8 @@ def main(argv: list[str] | None = None) -> int:
             configured["public_url"] = False
         print(json.dumps({"configured": configured, "risk_policy_max": RiskLevel.MEDIUM.name}, indent=2))
         return launch_bootstrap(no_tunnel=args.no_tunnel)
-    build_parser().print_help(); return 0
+    build_parser().print_help()
+    return 0
 
 
 if __name__ == "__main__":
