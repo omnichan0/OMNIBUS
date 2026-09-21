@@ -1,75 +1,94 @@
 # Sovereign AI Factory
 
-A portable, adaptive AI runtime built around **Open WebUI as the single
-primary UI**. The backend is designed to discover and compose capabilities
-through MCP, adapters, local models, Hugging Face resources, and APIs.
+Sovereign AI Factory is the primary OMNIBUS runtime: a portable, adaptive AI platform built around **Open WebUI as the primary user interface**. It discovers and composes capabilities through MCP, adapters, local models, Hugging Face resources, and authorized APIs.
 
-## Design principles
+## What it provides
 
-- **One UI:** Open WebUI.
-- **No provider lock-in:** models and services are capabilities, not
-  hard-coded application branches.
-- **Runtime discovery:** when a task needs a capability such as video,
-  research, browser automation, globe/geospatial data, or image generation,
-  the system can discover suitable implementations instead of assuming one
-  fixed provider.
-- **Portable:** Linux is the native runtime; Windows uses WSL2 for the same
-  Linux stack; Google Colab is a supported GPU runtime.
-- **Persistent where possible:** Colab state can live on Google Drive.
-- **Secrets stay out of Git:** HF and ngrok credentials come from runtime
-  secret stores/environment variables.
-- **Authorized integrations:** public or authorized data sources only;
-  third-party repositories must be used according to their licenses/terms.
+- YAML-driven capability contracts instead of hard-coded providers
+- Runtime discovery through provider manifests and Python entry points
+- Policy-based approval for high-risk providers and execution requests
+- Persistent provider manifests and approval decisions outside Git
+- Direct execution for laptop and Colab deployments
+- Optional Docker execution when Docker is available
+- Colab/Drive-aware bootstrap support for local models and Open WebUI
+- Lifecycle supervision, health checks, RAG, and hive runtime components
 
-## Quick start — Linux / Colab
+## Quick start
 
-    git clone YOUR_REPO_URL
-    cd sovereign-ai
-    chmod +x install.sh
-    ./install.sh
+### Install on Linux
 
-For Colab, put `HF_TOKEN` and `NGROK_TOKEN` in Colab Secrets before running
-the bootstrap.
+```bash
+git clone https://github.com/omnichan0/OMNIBUS.git
+cd OMNIBUS/sovereign-ai-factory
+chmod +x install.sh
+./install.sh
+```
 
-## Windows
+### Validate in Google Colab
 
-Run `install.ps1`. The supported Windows path uses WSL2 so the same Linux
-runtime and repository are used.
+```bash
+!git clone https://github.com/omnichan0/OMNIBUS.git /content/OMNIBUS
+%cd /content/OMNIBUS/sovereign-ai-factory
+!python -m pip install -e ".[dev]"
+!python -m compileall -q src core bootstrap
+!pytest -q
+!omnibus doctor
+!omnibus capabilities
+```
 
-## Current core
+For the full Colab bootstrap, mount Google Drive when persistence is desired and provide `HF_TOKEN` and `NGROK_TOKEN` through Colab Secrets. The public tunnel is optional; use `--no-tunnel` for local-only operation.
 
-`core/sovereign_hive_factory.py` is the supplied Sovereign Hive Factory
-engine. It provides the current Colab/Drive-persistent service stack,
-supervisor, Open WebUI, llama.cpp, model handling, RAG/hive services,
-Cline integration, and ngrok plumbing.
+## Runtime commands
 
-The surrounding repository is intentionally structured so MCP and future
-adapters/capability discovery can be added without turning Open WebUI into
-a collection of competing frontends.
+From `sovereign-ai-factory/`:
 
-## Secrets
+```bash
+# Inspect prerequisites and configured capabilities
+omnibus doctor
+omnibus capabilities
 
-Required for the full Hugging Face-backed capability set:
+# Discover provider manifests
+omnibus discover --manifest-dir ./providers
 
-    HF_TOKEN
+# Launch the full runtime without a public tunnel
+omnibus install --non-interactive --no-tunnel
 
-Required for a public ngrok URL:
+# Operate the Colab/local service stack directly
+python core/sovereign_hive_factory.py --status
+python core/sovereign_hive_factory.py --smoke-test
+python core/sovereign_hive_factory.py --sync
+python core/sovereign_hive_factory.py --stop
+```
 
-    NGROK_TOKEN
+## Configuration
 
-Never commit either secret.
+Capabilities are declared in [`config/capabilities.yaml`](config/capabilities.yaml). Providers can be discovered from JSON manifests or the `omnibus.providers` entry-point group.
 
-## Useful commands
+Provider state defaults to `.omnibus/`; set `OMNIBUS_STATE_DIR` to use another location. Runtime credentials and state should remain outside Git.
 
-    python3 core/sovereign_hive_factory.py --status
-    python3 core/sovereign_hive_factory.py --url
-    python3 core/sovereign_hive_factory.py --smoke-test
-    python3 core/sovereign_hive_factory.py --sync
-    python3 core/sovereign_hive_factory.py --stop
+## Supported environments
 
-## Important security note
+- **Linux:** native supported runtime
+- **Google Colab:** supported GPU runtime; Google Drive can provide persistence
+- **Windows:** use WSL2 for the Linux runtime and tooling
+- **Docker:** optional isolated execution backend when Docker is installed and configured
 
-The public tunnel should expose Open WebUI only. Administrative, shell,
-computer-use, MCP, and backend endpoints should remain local or explicitly
-protected. Review adapter licenses, provider terms, and access controls
-before enabling new capabilities.
+## Validation status
+
+The production foundation is merged into `main` and has passed direct-execution validation in Google Colab, including compilation, automated tests, package imports, registry loading, CLI checks, platform/GPU probing, manifest validation, approval gating, and execution safety checks.
+
+Docker execution, full model downloads, llama.cpp compilation, Open WebUI startup, and public ngrok access depend on the target environment and credentials. Test those paths before using them for a production deployment.
+
+## Secrets and security
+
+Never commit secrets. Configure these at runtime as needed:
+
+- `HF_TOKEN` for Hugging Face-backed capabilities
+- `NGROK_TOKEN` or `NGROK_AUTHTOKEN` for a public tunnel
+- `SOVEREIGN_API_KEY` and `WEBUI_SECRET_KEY` for protected services
+
+The public tunnel should expose Open WebUI only. Keep administrative, shell, computer-use, MCP, and backend endpoints local or explicitly protected. Use public or authorized data sources and review third-party licenses and terms.
+
+## Reporting issues
+
+When testing, please open a GitHub Issue or comment on the relevant pull request with your environment, commit, command, expected result, actual result, logs, and suggested improvement. Useful labels include `testing`, `bug`, `production-readiness`, and `security`.
