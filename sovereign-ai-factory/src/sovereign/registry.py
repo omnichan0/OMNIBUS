@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Callable
+
+from .config import CapabilityConfig
 
 
 @dataclass(frozen=True, slots=True)
@@ -11,6 +14,26 @@ class CapabilitySpec:
     discovery: tuple[str, ...] = ()
     authorization: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
+
+    @classmethod
+    def from_mapping(cls, value: dict[str, Any]) -> "CapabilitySpec":
+        name = str(value.get("id", "")).strip()
+        if not name:
+            raise ValueError("Capability entries require a non-empty id")
+        discovery = value.get("discovery", ())
+        if isinstance(discovery, str):
+            discovery = (discovery,)
+        if not isinstance(discovery, (list, tuple)):
+            raise ValueError(f"Capability '{name}' discovery must be a list")
+        known = {"id", "category", "discovery", "authorization"}
+        metadata = {key: item for key, item in value.items() if key not in known}
+        return cls(
+            name=name,
+            category=str(value.get("category", "general")),
+            discovery=tuple(str(item) for item in discovery),
+            authorization=value.get("authorization"),
+            metadata=metadata,
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -30,21 +53,40 @@ class CapabilityRegistry:
         self._capabilities: dict[str, CapabilitySpec] = {}
         self._adapters: dict[str, list[AdapterSpec]] = {}
 
-    def register_capability(self, spec: CapabilitySpec) -> None:
+    @classmethod
+    def from_config(cls, config: CapabilityConfig) -> "CapabilityRegistry":
+        registry = cls()
+        for raw in config.capabilities:
+            registry.register_capability(CapabilitySpec.from_mapping(raw))
+        return registry
+
+    @classmethod
+    def from_yaml(cls, path: str | Path) -> "CapabilityRegistry":
+        return cls.from_config(CapabilityConfig.load(path))
+
+    def register_capability(self, spec: CapabilitySpec, *, replace: bool = False) -> None:
+        if spec.name in self._capabilities and not replace:
+            return
         self._capabilities[spec.name] = spec
         self._adapters.setdefault(spec.name, [])
 
+    def register_discovered_capability(self, spec: CapabilitySpec) -> None:
+        """Register a capability discovered by an adapter/repository inspector."""
+        self.register_capability(spec, replace=True)
+
     def register_adapter(self, adapter: AdapterSpec) -> None:
         if adapter.capability not in self._capabilities:
-            self.register_capability(
+            self.register_discovered_capability(
                 CapabilitySpec(
                     name=adapter.capability,
                     category="dynamic",
-                    discovery=("registry",),
+                    discovery=("adapter",),
                     metadata={"auto_registered": True},
                 )
             )
-        self._adapters.setdefault(adapter.capability, []).append(adapter)
+        adapters = self._adapters.setdefault(adapter.capability, [])
+        if not any(existing.name == adapter.name for existing in adapters):
+            adapters.append(adapter)
 
     def capability(self, name: str) -> CapabilitySpec | None:
         return self._capabilities.get(name)
@@ -57,38 +99,9 @@ class CapabilityRegistry:
 
     def resolve(self, capability_name: str) -> list[AdapterSpec]:
         adapters = self.adapters_for(capability_name)
-        if not adapters:
-            return []
-        return sorted(adapters, key=lambda a: (len(a.required_permissions), a.name))
+        return sorted(adapters, key=lambda adapter: (len(adapter.required_permissions), adapter.name))
 
 
-def default_capability_registry() -> CapabilityRegistry:
-    registry = CapabilityRegistry()
-    registry.register_capability(
-        CapabilitySpec(
-            name="reasoning",
-            category="model",
-            discovery=("local_model", "huggingface", "openai_compatible"),
-            authorization="internal",
-            metadata={"default_model": "reasoning"},
-        )
-    )
-    registry.register_capability(
-        CapabilitySpec(
-            name="coding",
-            category="model",
-            discovery=("local_model", "huggingface", "openai_compatible"),
-            authorization="internal",
-            metadata={"default_model": "coder"},
-        )
-    )
-    registry.register_capability(
-        CapabilitySpec(
-            name="document_rag",
-            category="knowledge",
-            discovery=("local_service", "mcp"),
-            authorization="read:knowledge",
-            metadata={"retrieval": "lexical"},
-        )
-    )
-    return registry
+def load_registry(path: str | Path) -> CapabilityRegistry:
+    """Load the complete capability registry from the operator's YAML file."""
+    return CapabilityRegistry.from_yaml(path)
