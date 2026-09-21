@@ -1,190 +1,150 @@
-<p align="center">
-  <img src="assets/omnibus-banner.svg" alt="OMNIBUS banner" width="100%" />
-</p>
-
-<div align="center">
-
-# Aladejana Loveth Ayomide
-## omnichan0 | journeyman | Amaterasu Warlord | Encyclopedia
-
-[![GitHub](https://img.shields.io/badge/GitHub-omnichan0-181717?style=for-the-badge&logo=github)](https://github.com/omnichan0)
-[![Telegram](https://img.shields.io/badge/Telegram-%40journeyman189-26A5E4?style=for-the-badge&logo=telegram)](https://t.me/journeyman189)
-[![X / Twitter](https://img.shields.io/badge/X-%40journeyman189-000000?style=for-the-badge&logo=x)](https://x.com/journeyman189)
-
-</div>
+# OMNIBUS
 
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=28&duration=4000&pause=1000&color=7EE7FF&center=true&vCenter=true&width=700&lines=Builder.+Writer.+Teacher.+Technologist.+Storyteller;AI+Architect.+Mythmaker.+Systems+Thinker;Culture+meets+Code" alt="Typing SVG" />
+  <img src="assets/omnibus-banner.svg" alt="OMNIBUS — Advanced AI-Assisted Repository powered by GitHub Copilot" width="100%" />
 </p>
 
----
+[![Quality checks](https://github.com/omnichan0/OMNIBUS/actions/workflows/sanity.yml/badge.svg?branch=main)](https://github.com/omnichan0/OMNIBUS/actions/workflows/sanity.yml)
 
-<div align="center">
-  <h3>
-    <img src="https://emojicdn.com/apple/C0/1F680.png" width="20" /> Builder • Writer • Teacher • AI Architect • Cultural Strategist
-  </h3>
-</div>
+OMNIBUS is an extensible AI-agent platform foundation. Its primary implementation, **Sovereign AI Factory**, provides a portable runtime for capability discovery, provider adapters, policy-controlled execution, persistent state, and secure deployment across Linux, Google Colab, Windows/WSL2, and optional Docker environments.
 
-I am Aladejana Loveth Ayomide — a multidisciplinary creator, technologist, educator, and systems thinker whose life and work live at the intersection of culture, mythology, technology, and service.
+## Highlights
 
-I carry ancestral roots in Owo and paternal ties to Agbado-Ekiti, Isarun Quarters, and my work is deeply shaped by Yoruba philosophy, Oríkì, Ofọ̀, Àyájọ́, and the sacred symbolism of the Orisha. I build systems not only for power, but for meaning, clarity, and cultural intelligence.
+- **Registry-driven capabilities** configured through YAML
+- **Runtime provider discovery** through manifests and entry points
+- **Risk-based approval gates** for high-risk providers and actions
+- **Policy-aware execution** with direct and optional Docker backends
+- **Persistent provider state** and approval records outside Git
+- **Colab-friendly deployment** with optional Google Drive persistence
+- **Open WebUI as the primary user interface**
+- **Security-oriented defaults** for secrets, public tunnels, and authorized data sources
 
----
+## Repository layout
 
-## 🌌 Identity
+The repository is intentionally organized as a complete project tree rather than a single documentation folder:
 
-- Full name: Aladejana Loveth Ayomide
-- Alias: omnichan0
-- Titles: journeyman, Amaterasu Warlord, Encyclopedia
-- Twitter / Telegram: @journeyman189
-- GitHub: [omnichan0](https://github.com/omnichan0)
+```text
+OMNIBUS/
+├── README.md
+├── assets/
+│   └── omnibus-banner.svg
+└── sovereign-ai-factory/
+    ├── README.md
+    ├── pyproject.toml
+    ├── config/
+    │   └── capabilities.yaml
+    ├── src/sovereign/
+    │   ├── __init__.py
+    │   ├── agent.py
+    │   ├── cli.py
+    │   ├── config.py
+    │   ├── discovery.py
+    │   ├── execution.py
+    │   ├── orchestrator.py
+    │   ├── persistence.py
+    │   ├── policy.py
+    │   └── registry.py
+    ├── tests/
+    ├── core/
+    ├── bootstrap/
+    ├── adapters/
+    ├── scripts/
+    ├── install.sh
+    ├── install.ps1
+    └── .github/workflows/
+        └── sanity.yml
+```
 
----
+## Quick start
 
-## ✍️ Creative Work & Writing
+### Linux
 
-I am a published author and poet whose creative work explores myth, identity, consciousness, and destiny.
+```bash
+git clone https://github.com/omnichan0/OMNIBUS.git
+cd OMNIBUS/sovereign-ai-factory
+chmod +x install.sh
+./install.sh
+```
 
-### Published books
-- OUR SHIP
-- SCARE WITHIN
-- JOHN WICK 1&2
-- KARMA ON A WINTER HOLIDAY
+### Google Colab
 
-### Poetry
-- Published poet on PoemHunter
+```bash
+!git clone https://github.com/omnichan0/OMNIBUS.git /content/OMNIBUS
+%cd /content/OMNIBUS/sovereign-ai-factory
+!python -m pip install -e ".[dev]"
+!python -m compileall -q src core bootstrap
+!pytest -q
+```
 
-### Mythic fiction
-- THE MOUNTAIN GOD MANUSCRIPT
-- JOURNEYMAN
+For the full Colab runtime, configure `HF_TOKEN` and, when a public URL is required, `NGROK_TOKEN` through Colab Secrets. Never commit credentials.
 
-These works fuse:
-- Yoruba mythology
-- ancestral intelligence
-- Orisha cosmology
-- mystical transformation
-- Xianxia-inspired cultivation philosophy
-- heroic and symbolic worldbuilding
+### Windows
 
-### Game design concepts
-I also design tactical and multi-dimensional simulation frameworks focused on:
-- spatial strategy
-- adaptive AI behavior
-- mythic world structure
-- layered decision systems
+The supported Windows path uses WSL2 so the same Linux runtime can be used. See [`sovereign-ai-factory/README.md`](sovereign-ai-factory/README.md) and `install.ps1` for the Windows setup path.
 
----
+## Runtime commands
 
-## 🧠 Technology & AI
+From `sovereign-ai-factory/`:
 
-I build systems that combine local intelligence, runtime orchestration, automation, and creator tooling.
+```bash
+# Inspect prerequisites and configured capabilities
+omnibus doctor
+omnibus capabilities
 
-### Core focus
-- Sovereign AI and local model deployment
-- GGUF-based inference and model orchestration
-- AI-assisted workflows and runtime architecture
-- Open-source systems and experimentation
-- Cybersecurity, OSINT, and systems analysis
-- Web development and product building
+# Discover provider manifests
+omnibus discover --manifest-dir ./providers
 
-### Stack
-- Python
-- JavaScript
-- Node.js
-- Express
-- Flask
-- HTML / CSS / Tailwind
-- GitHub, Firebase, Replit, Render, Vercel, Google Cloud Shell
+# Launch the full runtime without a public tunnel
+omnibus install --non-interactive --no-tunnel
 
-### AI stack
-- Cline
-- Continue
-- Llama
-- Dolphin
-- Qwen
-- OpenRouter
-- Local GGUF model workflows
+# Operate the Colab/local service stack directly
+python core/sovereign_hive_factory.py --status
+python core/sovereign_hive_factory.py --smoke-test
+python core/sovereign_hive_factory.py --sync
+python core/sovereign_hive_factory.py --stop
+```
 
-### Projects
-- OMNIBUS — sovereign AI platform foundation
-- AJIKE — personal AI interface experimentation
-- CBT systems for education
-- n8n automation pipelines
-- AJIKE Coin experiment on TON testnet
-- security and OSINT exploration tooling
+## Configuration
 
----
+Capabilities are declared in [`sovereign-ai-factory/config/capabilities.yaml`](sovereign-ai-factory/config/capabilities.yaml). Providers can be discovered from JSON manifests or the `omnibus.providers` entry-point group.
 
-## 🎓 Education & Professional Background
+Provider state defaults to `.omnibus/`; set `OMNIBUS_STATE_DIR` to use another location. Runtime credentials and state should remain outside Git.
 
-### Education
-- Tourism and Hospitality Management graduate from Ekiti State University
+## Supported environments
 
-### Secondary education
-- Ado Community High School
-- Ibadan Community High School
+- **Linux:** native supported runtime
+- **Google Colab:** supported GPU runtime; Google Drive can provide persistence
+- **Windows:** use WSL2 for the Linux runtime and tooling
+- **Docker:** optional isolated execution backend when Docker is installed and configured
 
-### Primary education
-- Emmanuel Nursery/Primary
-- Christ Reigneth Nursery/Primary
+## Validation status
 
-### Teaching & curriculum
-I currently serve as a secondary school teacher at Ekiti Anglican Diocesan High School, where I teach Government and History.
+The production foundation has been merged into `main` and has passed direct-execution validation in Google Colab, including compilation, automated tests, package imports, registry loading, CLI checks, platform and GPU detection, invalid provider-manifest rejection, high-risk provider approval gating, direct-execution safety checks, and orchestrator smoke execution.
 
-I design:
-- NERDC-aligned lesson plans
-- WAEC-standard assessments
-- curriculum frameworks
-- Cultural & Creative Arts resources
-- digital learning content for programming and cybersecurity
+Docker execution, full model downloads, llama.cpp compilation, Open WebUI startup, and public ngrok access depend on the target environment and credentials. Test those paths before using them for production workloads.
 
-### Leadership & advocacy
-I serve as Senior Special Assistant on External Matters at the Youth Confederation of Nigeria, where I contribute to:
-- youth advocacy
-- public engagement
-- strategic external representation
-- community mobilization
+## Tester feedback
 
----
+If you test OMNIBUS, please open a GitHub Issue or comment on the relevant pull request with:
 
-## 🧭 Philosophy
+- operating system and Python version
+- commit or branch tested
+- command or workflow used
+- expected behavior
+- actual behavior
+- logs or traceback
+- suggested improvement
 
-I believe in:
+Useful labels include `testing`, `bug`, `production-readiness`, and `security`.
 
-- building with purpose
-- honoring ancestry while shaping the future
-- preserving cultural memory
-- using technology to empower people
-- combining creativity with systems thinking
-- turning knowledge into tools, stories, and impact
+## Security and responsible use
 
----
+- Keep `HF_TOKEN`, `NGROK_TOKEN`, API keys, and other secrets outside Git.
+- Expose only Open WebUI through a public tunnel unless additional endpoints are explicitly protected.
+- Keep administrative, shell, computer-use, MCP, and backend endpoints local or authenticated.
+- Use only public or authorized data sources.
+- Review third-party licenses and provider terms before enabling integrations.
 
-## 📌 Current Work
+## Main project
 
-- AI architecture and orchestration
-- mythic storytelling and worldbuilding
-- online education and technical training
-- digital product design
-- open-source experimentation
-- public-facing leadership and cultural advocacy
-
----
-
-## 🌍 Contact
-
-- X / Twitter: [@journeyman189](https://x.com/journeyman189)
-- Telegram: [@journeyman189](https://t.me/journeyman189)
-- GitHub: [omnichan0](https://github.com/omnichan0)
-
----
-
-## 🪐 Signature
-
-I work at the intersection of myth, code, leadership, and future-building — turning stories, systems, and knowledge into instruments of growth, vision, and transformation.
-
----
-
-<div align="center">
-  <sub>Built with culture, code, myth, and intention.</sub>
-</div>
+The implementation and detailed runtime documentation are in [`sovereign-ai-factory/`](sovereign-ai-factory/).
