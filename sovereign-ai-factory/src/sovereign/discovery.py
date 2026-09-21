@@ -7,14 +7,13 @@ from importlib.metadata import entry_points
 from pathlib import Path
 from typing import Any, Iterable
 
+from .persistence import ProviderStateStore
 from .policy import ApprovalPolicy, ExecutionRequest, RiskLevel
 from .registry import AdapterSpec, CapabilityRegistry, CapabilitySpec
 
 
 @dataclass(frozen=True, slots=True)
 class ProviderManifest:
-    """Declarative description supplied by a provider or repository adapter."""
-
     name: str
     capability: str
     category: str = "discovered"
@@ -26,13 +25,12 @@ class ProviderManifest:
 
     @classmethod
     def from_mapping(cls, value: dict[str, Any]) -> "ProviderManifest":
-        required = ("name", "capability")
-        missing = [key for key in required if not str(value.get(key, "")).strip()]
+        missing = [key for key in ("name", "capability") if not str(value.get(key, "")).strip()]
         if missing:
             raise ValueError(f"Provider manifest missing: {', '.join(missing)}")
-        risk = value.get("risk", RiskLevel.MEDIUM)
-        if not isinstance(risk, RiskLevel):
-            risk = RiskLevel[str(risk).upper()] if isinstance(risk, str) else RiskLevel(int(risk))
+        raw_risk = value.get("risk", RiskLevel.MEDIUM)
+        if not isinstance(raw_risk, RiskLevel):
+            raw_risk = RiskLevel[str(raw_risk).upper()] if isinstance(raw_risk, str) else RiskLevel(int(raw_risk))
         return cls(
             name=str(value["name"]),
             capability=str(value["capability"]),
@@ -40,7 +38,7 @@ class ProviderManifest:
             discovery=tuple(str(item) for item in value.get("discovery", ())),
             entrypoint=value.get("entrypoint"),
             permissions=tuple(str(item) for item in value.get("permissions", ())),
-            risk=risk,
+            risk=raw_risk,
             metadata=dict(value.get("metadata", {})),
         )
 
@@ -63,18 +61,12 @@ def _load_entrypoint(reference: str) -> Any:
 
 
 class ProviderDiscovery:
-    """Discover declared providers without silently granting execution access.
-
-    Providers publish manifests through Python entry points or JSON manifest
-    files. Discovery is declarative; approval is required before an adapter is
-    made active when its risk exceeds the operator policy.
-    """
-
     ENTRYPOINT_GROUP = "omnibus.providers"
 
-    def __init__(self, registry: CapabilityRegistry, policy: ApprovalPolicy | None = None) -> None:
+    def __init__(self, registry: CapabilityRegistry, policy: ApprovalPolicy | None = None, store: ProviderStateStore | None = None) -> None:
         self.registry = registry
         self.policy = policy or ApprovalPolicy()
+        self.store = store
 
     def manifests_from_entrypoints(self) -> Iterable[ProviderManifest]:
         discovered = entry_points()
@@ -89,48 +81,32 @@ class ProviderDiscovery:
         if not root.exists():
             return
         for path in sorted(root.glob("*.json")):
-            with path.open("r", encoding="utf-8") as handle:
-                payload = json.load(handle)
-            values = payload if isinstance(payload, list) else [payload]
-            for value in values:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            for value in payload if isinstance(payload, list) else [payload]:
                 if not isinstance(value, dict):
                     raise ValueError(f"Provider manifest must be an object: {path}")
                 yield ProviderManifest.from_mapping(value)
 
     def inspect(self, manifest: ProviderManifest, *, approved: bool = False) -> DiscoveryResult:
-        request = ExecutionRequest(
-            capability=manifest.capability,
-            action=f"register provider {manifest.name}",
-            risk=manifest.risk,
-            permissions=manifest.permissions,
-        )
+        request = ExecutionRequest(manifest.capability, f"register provider {manifest.name}", risk=manifest.risk, permissions=manifest.permissions)
         decision = self.policy.evaluate(request, approved=approved)
         if decision.state.value == "pending":
-            return DiscoveryResult(manifest, "pending_approval", decision.reason)
-        self.registry.register_discovered_capability(
-            CapabilitySpec(
-                name=manifest.capability,
-                category=manifest.category,
-                discovery=manifest.discovery or ("provider",),
-                metadata={"provider": manifest.name, **manifest.metadata},
-            )
-        )
-        if not manifest.entrypoint:
-            return DiscoveryResult(manifest, "discovered", "manifest registered; no executable entrypoint declared")
-        implementation = _load_entrypoint(manifest.entrypoint)
-        self.registry.register_adapter(
-            AdapterSpec(
-                name=manifest.name,
-                capability=manifest.capability,
-                implementation=implementation,
-                required_permissions=manifest.permissions,
-                metadata={"provider_manifest": manifest.name, **manifest.metadata},
-            )
-        )
-        return DiscoveryResult(manifest, "active", decision.reason)
+            result = DiscoveryResult(manifest, "pending_approval", decision.reason)
+        else:
+            self.registry.register_discovered_capability(CapabilitySpec(manifest.capability, manifest.category, manifest.discovery or ("provider",), metadata={"provider": manifest.name, **manifest.metadata}))
+            if not manifest.entrypoint:
+                result = DiscoveryResult(manifest, "discovered", "manifest registered; no executable entrypoint declared")
+            else:
+                self.registry.register_adapter(AdapterSpec(manifest.name, manifest.capability, _load_entrypoint(manifest.entrypoint), manifest.permissions, {"provider_manifest": manifest.name, **manifest.metadata}))
+                result = DiscoveryResult(manifest, "active", decision.reason)
+        if self.store:
+            self.store.save_result(result)
+            if approved:
+                self.store.save_approval(manifest, True)
+        return result
 
     def discover(self, *, manifest_directory: str | Path | None = None, approved: bool = False) -> list[DiscoveryResult]:
         manifests = list(self.manifests_from_entrypoints())
         if manifest_directory is not None:
             manifests.extend(self.manifests_from_directory(manifest_directory))
-        return [self.inspect(manifest, approved=approved) for manifest in manifests]
+        return [self.inspect(manifest, approved=approved or (self.store.is_approved(manifest) if self.store else False)) for manifest in manifests]
