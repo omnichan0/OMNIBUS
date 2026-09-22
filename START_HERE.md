@@ -1,14 +1,8 @@
 # OMNIBUS — Start Here
 
-OMNIBUS is designed so a beginner can copy one command, answer the ngrok question when needed, and let the installer do the work.
+OMNIBUS is designed so a beginner can copy one command and let the installer detect the platform and resources.
 
-## Choose your path
-
-### Google Colab (recommended for a GPU)
-
-1. Open a new Google Colab notebook.
-2. Set **Runtime → Change runtime type → T4 GPU** if a GPU is available.
-3. Paste this entire cell and run it:
+## Google Colab
 
 ```python
 from google.colab import drive
@@ -20,13 +14,9 @@ drive.mount('/content/drive')
 !./install.sh
 ```
 
-The installer asks only for an **ngrok token** when it needs to create a public browser URL. Press **Enter** to run privately without a public tunnel.
+Colab uses the automatic model choices unless you set `SOVEREIGN_CHOOSE_MODELS=1`. A public URL is optional: paste an ngrok token when asked, or press Enter for private mode. `HF_TOKEN` is not required for ordinary public GGUF downloads.
 
-You do **not** need an `HF_TOKEN` just to download the default GGUF models. The agent may use Hugging Face later as an optional tool—for example, for a Hugging Face Space, MCP integration, or another gated resource. Provide `HF_TOKEN` in Colab Secrets only if that later capability asks for it.
-
-### Linux
-
-Open a terminal and paste:
+## Linux
 
 ```bash
 git clone https://github.com/omnichan0/OMNIBUS.git
@@ -35,52 +25,44 @@ chmod +x install.sh
 ./install.sh
 ```
 
-The installer detects the package manager and installs missing runtime prerequisites where it has permission. It then installs the Python environment, Open WebUI, llama.cpp, models, Cline, and optional ngrok, starts the services, and runs smoke tests.
+The installer installs or restores missing components, displays RAM and disk space, and starts the self-healing runtime.
 
-### Windows
+## Replit
 
-Install WSL2 first in PowerShell:
+Replit can run a lightweight CPU profile, but it is not a replacement for a Colab GPU. In the Replit Shell:
 
-```powershell
-wsl --install
+```bash
+git clone https://github.com/omnichan0/OMNIBUS.git
+cd OMNIBUS
+chmod +x install.sh
+./install.sh
 ```
 
-Restart if Windows asks you to. Then open Ubuntu/WSL and use the Linux instructions above. The supported runtime is Linux inside WSL2.
+The installer detects Replit and automatically disables ngrok and the computer-use service. It shows available RAM and disk, then asks you to press Enter for automatic model selection or paste a small GGUF repository/file/URL. Choose a small quantized model; large models may not fit Replit memory or may be too slow.
 
-## What happens automatically
+Replit's own web URL should be used instead of ngrok. If the platform does not expose the service automatically, configure the Replit web server port for `3000`.
 
-The bootstrap checks and provisions missing components instead of assuming they are already installed:
+## Model input examples
 
-- system build tools, Git, cURL, CMake, compiler, `pkg-config`, and FFmpeg;
-- an isolated Python 3.11 environment;
-- Open WebUI and its Python dependencies;
-- llama.cpp, compiled for NVIDIA CUDA when the environment provides `nvidia-smi` and `nvcc`, otherwise for CPU;
-- Node.js and Cline;
-- ngrok when a public tunnel is requested;
-- GGUF reasoning and coding models;
-- Drive-backed caches, model reuse, service supervision, and retries.
+At the model prompt, you can paste:
 
-The GGUF downloader uses public Hugging Face resolve URLs by default. It discovers a suitable file, resumes interrupted transfers, retries network failures, and reuses a Drive copy when available. An HF token is not part of the normal GGUF setup. Model files are deliberately kept out of Git because they are large runtime assets.
+```text
+TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF
+```
+
+or:
+
+```text
+TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf
+```
+
+or a full public Hugging Face `resolve` URL. The installer resolves the choice and downloads the public GGUF with resume/retry support.
 
 ## Tokens
 
-- `NGROK_TOKEN` or `NGROK_AUTHTOKEN`: optional; only needed for a public URL.
-- `HF_TOKEN`: optional agent capability; use it later for Hugging Face Spaces, HF MCP/tools, gated repositories, or other authenticated Hugging Face services.
-- Never paste tokens into GitHub files or commit them.
+- `NGROK_TOKEN`: only for a public ngrok URL; Replit normally does not need it.
+- `HF_TOKEN`: optional later agent credential for Hugging Face Spaces, HF MCP/tools, gated/private resources, or authenticated services.
 
-If the installer cannot install a missing system package because the account has no `sudo` permission, it will say exactly what is missing. On Colab, the notebook runtime normally provides Python and the required permissions.
+## What gets provisioned
 
-## After installation
-
-The installer prints the Open WebUI address and the generated administrator credentials. Keep the credentials private and change the password after first login.
-
-Useful commands from the repository root:
-
-```bash
-python3 core/sovereign_hive_factory.py --status
-python3 core/sovereign_hive_factory.py --url
-python3 core/sovereign_hive_factory.py --sync
-python3 core/sovereign_hive_factory.py --stop
-```
-
-If a Colab runtime is recycled, mount Drive and run the same installer again. Cached models, the Python environment, llama.cpp, chats, and service state can be restored instead of downloaded again.
+The bootstrap checks for and provisions the Python environment, Open WebUI, llama.cpp, Node/Cline, optional ngrok, GGUF models, caches, service supervision, and smoke tests. It uses a cached Drive environment/model/build on later Colab runs.
