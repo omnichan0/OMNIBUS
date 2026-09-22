@@ -1,13 +1,15 @@
-# OMNIBUS model selection
+# Models
 
-The installer checks available RAM and disk before the model step. On Replit or another interactive CPU host it asks whether to use the automatic model choice or to provide either:
+Model files are runtime assets, not GitHub assets.
 
-- a Hugging Face repository, for example `TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF`;
-- a repository plus file, for example `TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf`;
-- a full public Hugging Face resolve URL.
+The installer reports available RAM and disk before downloading. On Replit it uses a CPU profile and asks for a small model repository/file or a public GGUF URL. On Colab/Linux, press Enter to use the defaults or set `SOVEREIGN_CHOOSE_MODELS=1` to choose explicitly.
 
-The installer resolves a repository/file choice to the public Hugging Face download URL. Public GGUF downloads do not require `HF_TOKEN`; that token is reserved for optional agent capabilities such as Spaces, HF MCP tools, gated repositories, or private resources.
+Supported input forms:
 
-Existing valid local and Google Drive copies are reused. Interrupted downloads resume from their `.part` file and retry. Keep at least the model size plus several GB of free disk for temporary files and runtime use.
+- Hugging Face repository: `owner/repository`
+- Repository and file: `owner/repository/file.gguf`
+- Public resolve URL: `https://huggingface.co/owner/repository/resolve/main/file.gguf`
 
-Replit is best used with a small quantized GGUF and CPU mode. Large coder models may not fit its RAM or may be too slow. Colab with a GPU is the better target for the default larger models.
+Public GGUF files are downloaded from Hugging Face resolve URLs with resumable retries. `HF_TOKEN` is not required for ordinary public GGUF downloads. It is reserved for optional authenticated agent capabilities such as Hugging Face Spaces, HF MCP tools, gated repositories, and private resources.
+
+Existing valid local and Drive copies are reused. Model files are intentionally not committed to Git.

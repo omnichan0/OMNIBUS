@@ -1,20 +1,31 @@
 # OMNIBUS — Start Here
 
-OMNIBUS is designed so a beginner can copy one command and let the installer detect the platform and resources.
+## Colab: GPU-first startup
 
-## Google Colab
+1. In Colab choose **Runtime → Change runtime type → T4 GPU**.
+2. Paste this one cell:
 
 ```python
 from google.colab import drive
 drive.mount('/content/drive')
 
+!rm -rf /content/OMNIBUS
 !git clone https://github.com/omnichan0/OMNIBUS.git /content/OMNIBUS
 %cd /content/OMNIBUS
 !chmod +x install.sh
 !./install.sh
 ```
 
-Colab uses the automatic model choices unless you set `SOVEREIGN_CHOOSE_MODELS=1`. A public URL is optional: paste an ngrok token when asked, or press Enter for private mode. `HF_TOKEN` is not required for ordinary public GGUF downloads.
+The installer will:
+
+- detect the T4 with `nvidia-smi`;
+- locate or install the CUDA compiler when possible;
+- build llama.cpp with CUDA rather than CPU when `nvcc` is available;
+- set all model layers for GPU offload (`LLAMA_GPU_LAYERS=99`);
+- print the GPU and CUDA status before building;
+- restore a matching cached build from Drive on later runs.
+
+A public URL is optional. Paste an ngrok token when asked, or press **Enter** for private mode. `HF_TOKEN` is not required for public GGUF downloads; it is reserved for later authenticated Hugging Face agent tools, Spaces, MCP integrations, or gated resources.
 
 ## Linux
 
@@ -25,11 +36,9 @@ chmod +x install.sh
 ./install.sh
 ```
 
-The installer installs or restores missing components, displays RAM and disk space, and starts the self-healing runtime.
+The installer detects the platform, GPU, RAM, and disk, then provisions the missing runtime components.
 
 ## Replit
-
-Replit can run a lightweight CPU profile, but it is not a replacement for a Colab GPU. In the Replit Shell:
 
 ```bash
 git clone https://github.com/omnichan0/OMNIBUS.git
@@ -38,31 +47,28 @@ chmod +x install.sh
 ./install.sh
 ```
 
-The installer detects Replit and automatically disables ngrok and the computer-use service. It shows available RAM and disk, then asks you to press Enter for automatic model selection or paste a small GGUF repository/file/URL. Choose a small quantized model; large models may not fit Replit memory or may be too slow.
+Replit is treated as a lightweight CPU profile: ngrok and computer-use are disabled, and the installer displays available RAM and disk. It asks for a model repository/file or public GGUF URL when model selection is enabled. Use a small quantized model; Colab is the better environment for large GPU models.
 
-Replit's own web URL should be used instead of ngrok. If the platform does not expose the service automatically, configure the Replit web server port for `3000`.
+## Model selection
 
-## Model input examples
-
-At the model prompt, you can paste:
+Set `SOVEREIGN_CHOOSE_MODELS=1` before starting if you want to choose models on Colab/Linux. Replit asks automatically. At the prompt, press Enter for the default or paste:
 
 ```text
 TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF
-```
-
-or:
-
-```text
 TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf
+https://huggingface.co/<repo>/resolve/main/<file>.gguf
 ```
 
-or a full public Hugging Face `resolve` URL. The installer resolves the choice and downloads the public GGUF with resume/retry support.
+Public GGUF downloads use Hugging Face resolve URLs with resume/retry support and do not require `HF_TOKEN`.
 
-## Tokens
+## If the output says CPU fallback
 
-- `NGROK_TOKEN`: only for a public ngrok URL; Replit normally does not need it.
-- `HF_TOKEN`: optional later agent credential for Hugging Face Spaces, HF MCP/tools, gated/private resources, or authenticated services.
+A T4 is visible only when `nvidia-smi` works. CUDA compilation additionally needs `nvcc`. Run:
 
-## What gets provisioned
+```python
+!nvidia-smi
+!which nvcc || true
+!nvcc --version || true
+```
 
-The bootstrap checks for and provisions the Python environment, Open WebUI, llama.cpp, Node/Cline, optional ngrok, GGUF models, caches, service supervision, and smoke tests. It uses a cached Drive environment/model/build on later Colab runs.
+If `nvidia-smi` works but `nvcc` does not, the installer tries the CUDA toolkit installation automatically. If that fails, it reports CPU fallback instead of pretending the GPU is being used.
