@@ -4,8 +4,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export SOVEREIGN_REPO_ROOT="$ROOT"
 
-# Beginner-friendly launcher. It detects the host, installs what it safely can,
-# shows the available disk/RAM, and lets the user choose smaller GGUFs on
+# Beginner-friendly launcher. It detects the environment, installs what it can,
+# shows the available disk/RAM, and lets the user choose a smaller GGUF on
 # constrained hosts such as Replit.
 install_python_if_missing() {
   command -v python3 >/dev/null 2>&1 && return 0
@@ -39,32 +39,33 @@ ask_tty() {
   printf "%s" "$answer"
 }
 
-# Accept either a Hugging Face repo/file choice or a full public resolve URL.
-# The runtime then resolves/downloads the file normally; HF_TOKEN is not needed
-# for public GGUFs.
 configure_model_choice() {
-  local kind="$1" repo_var="$2" file_var="$3" current_repo="$4"
-  local choice repo file path
-  [[ -n "${!repo_var:-}" || -n "${!file_var:-}" ]] && return 0
+  local kind="$1" repo_var="$2" file_var="$3"
+  local choice repo file
+  if [[ -n "${!repo_var:-}" || -n "${!file_var:-}" ]]; then
+    return 0
+  fi
   choice="$(ask_tty "${kind} GGUF (Enter for automatic choice; paste HF repo/file or URL): ")"
   [[ -z "$choice" ]] && return 0
-  if [[ "$choice" == https://huggingface.co/*/resolve/*/* ]]; then
-    path="${choice#https://huggingface.co/}"
+  if [[ "$choice" == *"huggingface.co"*"/resolve/"* ]]; then
+    local path="${choice#https://huggingface.co/}"
     repo="${path%%/resolve/*}"
     file="${path#*/resolve/}"
     file="${file#*/}"
   elif [[ "$choice" == */*.gguf ]]; then
     repo="${choice%%/*}"
-    file="${choice#*/}":
+    file="${choice#*/}"
   elif [[ "$choice" == */* ]]; then
     repo="$choice"
     file=""
   else
-    echo "[setup] Ignoring unrecognised model choice; using the automatic choice." >&2
+    echo "[setup] Ignoring unrecognized model choice; using the automatic model set." >&2
     return 0
   fi
   export "$repo_var=$repo"
-  [[ -n "$file" ]] && export "$file_var=$file"
+  if [[ -n "$file" ]]; then
+    export "$file_var=$file"
+  fi
   echo "[setup] ${kind}: ${repo}${file:+ :: $file}" >&2
 }
 
@@ -79,6 +80,7 @@ elif [[ -n "${REPL_ID:-}" || -n "${REPLIT_DEV_DOMAIN:-}" || -n "${REPL_OWNER:-}"
 else
   PLATFORM="linux"
 fi
+
 echo "[platform] $PLATFORM"
 
 if command -v free >/dev/null 2>&1; then
@@ -86,7 +88,6 @@ if command -v free >/dev/null 2>&1; then
 fi
 echo "[resources] Disk: $(df -h "$ROOT" | awk 'NR==2 {print $4 " free"}')"
 
-# Replit normally supplies its own public URL and is commonly CPU-only.
 if [[ "$PLATFORM" == "replit" ]]; then
   export ENABLE_COMPUTER="${ENABLE_COMPUTER:-false}"
   export LLAMA_GPU_LAYERS="${LLAMA_GPU_LAYERS:-0}"
@@ -94,20 +95,26 @@ if [[ "$PLATFORM" == "replit" ]]; then
 fi
 
 if [[ "$PLATFORM" == "replit" || "${SOVEREIGN_CHOOSE_MODELS:-0}" == "1" ]]; then
-  configure_model_choice "Reasoning" SOVEREIGN_REASONING_REPO SOVEREIGN_REASONING_FILE "${SOVEREIGN_REASONING_REPO:-}"
-  configure_model_choice "Coding" SOVEREIGN_CODER_REPO SOVEREIGN_CODER_FILE "${SOVEREIGN_CODER_REPO:-}"
+  configure_model_choice "Reasoning" SOVEREIGN_REASONING_REPO SOVEREIGN_REASONING_FILE
+  configure_model_choice "Coding" SOVEREIGN_CODER_REPO SOVEREIGN_CODER_FILE
 fi
 
 NO_TUNNEL=0
 if [[ -z "${NGROK_TOKEN:-}" && -z "${NGROK_AUTHTOKEN:-}" && "$PLATFORM" != "replit" ]]; then
   token="$(ask_tty "ngrok token (optional; press Enter for private/local mode): ")"
-  if [[ -n "$token" ]]; then export NGROK_TOKEN="$token"; else NO_TUNNEL=1; fi
+  if [[ -n "$token" ]]; then
+    export NGROK_TOKEN="$token"
+  else
+    NO_TUNNEL=1
+  fi
 else
   NO_TUNNEL=1
 fi
 
 ARGS=("$@")
-[[ "$NO_TUNNEL" -eq 1 ]] && ARGS+=("--no-tunnel")
-[[ "$NO_TUNNEL" -eq 1 ]] && echo "[setup] No ngrok token supplied; starting in private/local mode."
+if [[ "$NO_TUNNEL" -eq 1 ]]; then
+  ARGS+=("--no-tunnel")
+  echo "[setup] No ngrok token supplied; starting in private/local mode."
+fi
 
 exec python3 "$ROOT/core/sovereign_hive_factory.py" --bootstrap --run-free "${ARGS[@]}"
